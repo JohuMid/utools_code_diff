@@ -1,0 +1,66 @@
+
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <title>Document</title> <style>
+    .box {
+        width: 400px;
+        height: 400px;
+        border: 1px solid #000;
+        margin: 100px auto;
+        box-shadow: 0 0 10px 5px rgba(0,0,0,.8);
+        border-radius: 10px;
+        line-height: 400px;
+        text-align: center;
+        font-size: 30px;
+        font-weight: 700;
+        text-shadow:0 0 5px;
+        transition:all 1s;
+    }
+    .box #entity{
+        width: 100%;
+        height: 100%;
+    }
+</style> </head> <body> <div class="box">拖拽外部文件至此</div> <script type="text/javascript">
+
+  // 需求：拖拽外部文件到当前页面进行解析
+
+  // 获取目标元素
+  var box = document.querySelector('.box');
+
+
+  // (1)需要解决一旦拖拽外部文件就覆盖掉当前页面的问题
+  //  解决：给document绑定drop事件
+  //  drop事件默认触发不了，需要在dragover事件里面阻止默认事件
+  document.ondrop = function(e){
+    e.preventDefault();
+  }
+  // 这个阻止默认事件是为了让drop事件得以触发
+  document.ondragover = function(e){
+    e.preventDefault();
+  }
+
+  box.ondragenter = function(){
+    box.style.boxShadow = '0 0 10px 5px rgba(255,0,0,.8)';
+  }
+
+  box.ondrop = function(e){
+    console.log(window.getSelection().toString());
+    // console.log(e);
+    // 得到拖拽过来的文件
+    var dataFile = e.dataTransfer.files[0];
+    // FileReader实例化
+    var fr = new FileReader();
+    // 异步读取文件
+    fr.readAsText(dataFile);
+    // 读取完毕之后执行
+    fr.onload = function(){
+      // 获取得到的结果
+      var data = fr.result;
+
+      var ta = document.createElement('textarea');
+      ta.value = data;
+      ta.id='entity';
+      box.innerHTML = '';
+      box.appendChild(ta);
+
+    }
+  }
+</script> </body> </html>

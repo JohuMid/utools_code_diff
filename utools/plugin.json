@@ -1,0 +1,27 @@
+{
+  "pluginName": "文本代码对比",
+  "description": "基于 Monaco Editor 文本代码对比，拥有更多功能的 diff，拥有 vscode 的观感。",
+  "version": "1.0.0",
+  "author": "johu",
+  "main": "dist/index.html",
+  "development": {
+    "main": "http://localhost:8081/index.html"
+  },
+  "logo": "logo.png",
+  "preload": "preload.js",
+  "features": [
+    {
+      "code": "diff",
+      "explain": "基于 Monaco Editor 文本代码对比，拥有更多功能的 diff，拥有 vscode 的观感。",
+      "cmds": [
+        "文本代码对比",
+        "code",
+        "diff",
+        {
+          "type": "regex",
+          "label": "文本代码对比"
+        }
+      ]
+    }
+  ]
+}
