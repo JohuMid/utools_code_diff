@@ -1,24 +1,23 @@
 # utools-code-diff
 
-## Project setup
+![](https://files.catbox.moe/kltnmr.png)
+
+## 基于utools平台的文本代码对比插件
+
+[![5Pth0x.jpg](https://z3.ax1x.com/2021/10/08/5Pth0x.jpg)](https://imgtu.com/i/5Pth0x)
+[![5Pt476.jpg](https://z3.ax1x.com/2021/10/08/5Pt476.jpg)](https://imgtu.com/i/5Pt476)
+
+## 使用
+
 ```
 npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
 npm run build
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
+* 配合utools开发者工具使用
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## 插件主页
+
+可以在插件页面进行反馈或建议。
+https://yuanliao.info/d/4217-vscode
