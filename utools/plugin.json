@@ -7,6 +7,9 @@
   "development": {
     "main": "http://localhost:8081/index.html"
   },
+  "pluginSetting": {
+    "single": false
+  },
   "logo": "logo.png",
   "preload": "preload.js",
   "features": [

@@ -3,7 +3,7 @@
       <div id="diff_control">
           <el-form :inline="true" ref="form" style="height: 41px;">
               <el-form-item class="select-style1">
-                  <el-select v-model="theme" size="mini" @change="themeChange" placeholder="主题">
+                  <el-select v-model="theme" size="mini" @change="switchSystem" placeholder="主题">
                       <el-option
                               v-for="item in themeOption"
                               :key="item.value"
@@ -64,6 +64,10 @@ export default {
         {
           value: 'vs-dark',
           label: '深色'
+        },
+        {
+          value: 'system',
+          label: '跟随uTools'
         }
       ],
       myEditorStyle: 'myEditorW',
@@ -140,8 +144,50 @@ export default {
         }
       }
     }
+    // eslint-disable-next-line no-undef
+    utools.onPluginEnter(() => {
+      // eslint-disable-next-line no-undef
+        const theme = utools.db.get('theme').data
+
+        this.theme = theme
+        
+        this.switchSystem(theme)
+    })
   },
   methods: {
+    updateThemeDb(){
+      // eslint-disable-next-line no-undef
+      console.log(utools.db.get('theme'));
+      // eslint-disable-next-line no-undef
+      if (!utools.db.get('theme')) {
+        // eslint-disable-next-line no-undef
+        utools.db.put({
+          _id: "theme",
+          data: this.theme
+        })
+      } else {
+        // eslint-disable-next-line no-undef
+        const theme = utools.db.get('theme')
+        // eslint-disable-next-line no-undef
+        utools.db.put({
+          _id: "theme",
+          data: this.theme,
+          _rev: theme._rev
+        })
+      }
+    },
+    switchSystem(theme){
+      if (theme === 'system') {
+          // eslint-disable-next-line no-undef
+          if(utools.isDarkColors()){
+            this.themeChange('vs-dark')
+          } else {
+            this.themeChange('vs')
+          }
+        } else {
+          this.themeChange(theme)
+        }
+    },
     initEditor () {
       const self = this
       const domEditor = document.getElementById('container')
@@ -170,6 +216,7 @@ export default {
         this.fontStyle = 'fontW'
         this.changeClass(document.body, "custom-08E6B9");
       }
+      this.updateThemeDb()
     },
     changeClass(element, className) {
       if (!element || !className) return;
