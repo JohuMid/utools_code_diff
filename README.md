@@ -7,12 +7,12 @@
 [![5Pth0x.jpg](https://z3.ax1x.com/2021/10/08/5Pth0x.jpg)](https://imgtu.com/i/5Pth0x)
 [![5Pt476.jpg](https://z3.ax1x.com/2021/10/08/5Pt476.jpg)](https://imgtu.com/i/5Pt476)
 
-## 使用
+## 本地使用
 
 ```
 npm install
 
-npm run build
+npm run serve
 ```
 
 * 配合utools开发者工具使用
