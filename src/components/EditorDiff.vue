@@ -3,7 +3,7 @@
       <div id="diff_control">
           <el-form :inline="true" ref="form" style="height: 41px;">
               <el-form-item class="select-style1">
-                  <el-select v-model="theme" size="mini" @change="switchSystem" placeholder="主题">
+                  <el-select v-model="originConfig.theme" size="mini" @change="switchSystem" placeholder="主题">
                       <el-option
                               v-for="item in themeOption"
                               :key="item.value"
@@ -13,7 +13,7 @@
                   </el-select>
               </el-form-item>
               <el-form-item class="select-style2">
-                  <el-select v-model="language" size="mini" filterable @change="languageChange" placeholder="比对语言">
+                  <el-select v-model="originConfig.language" size="mini" filterable @change="languageChange" placeholder="比对语言">
                       <el-option
                               v-for="item in languageOption"
                               :key="item.id"
@@ -23,20 +23,34 @@
                   </el-select>
               </el-form-item>
               <el-form-item>
-                  <el-button size="mini" @click="clearContent" icon="el-icon-delete" title="清除内容"></el-button>
+                  <el-button size="mini" @click="clearContent" icon="el-icon-delete" title="清除内容 ctrl+D"></el-button>
+              </el-form-item>
+              <el-form-item>
+                  <el-button size="mini" @click="formatContent" icon="el-icon-document-checked" title="文本格式化 ctrl+E"></el-button>
               </el-form-item>
               <el-form-item>
                   <el-button-group>
-                      <el-button size="mini" @click="previousDiff" icon="el-icon-arrow-left" title="上一处差异"></el-button>
-                      <el-button size="mini" @click="nextDiff" title="下一处差异"><i class="el-icon-arrow-right el-icon--right"></i></el-button>
+                      <el-button size="mini" @click="previousDiff" icon="el-icon-arrow-left" title="上一处差异 ctrl+ ←"></el-button>
+                      <el-button size="mini" @click="nextDiff" title="下一处差异 ctrl+ →"><i class="el-icon-arrow-right el-icon--right"></i></el-button>
                   </el-button-group>
               </el-form-item>
               <el-form-item>
-                  <el-checkbox border @change="InlineDiffChange" :class="fontStyle" size="mini" v-model="inlineDiff">行内对比</el-checkbox>
+                <el-dropdown size="mini" split-button type="border">
+                    更多操作
+                    <el-dropdown-menu slot="dropdown">
+                      <el-dropdown-item>
+                        <el-checkbox @change="InlineDiffChange" :class="fontStyle" size="mini" v-model="originConfig.inlineDiff">行内对比</el-checkbox>
+                      </el-dropdown-item>
+                      <el-dropdown-item>
+                        <el-checkbox @change="WordWrapChange" :class="fontStyle" size="mini" v-model="originConfig.wordWrap">自动换行</el-checkbox>
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </el-dropdown>
               </el-form-item>
-              <el-form-item>
-                  <el-checkbox border @change="WordWrapChange" :class="fontStyle" size="mini" v-model="wordWrap">自动换行</el-checkbox>
-              </el-form-item>
+              <!-- <el-form-item>
+                <el-checkbox border @change="InlineDiffChange" :class="fontStyle" size="mini" v-model="inlineDiff">行内对比</el-checkbox>
+                <el-checkbox border @change="WordWrapChange" :class="fontStyle" size="mini" v-model="wordWrap">自动换行</el-checkbox>
+              </el-form-item> -->
               <el-form-item v-show="diffNum!==0" style="float: right" :class="fontStyle">
                   <el-tag type="warning">{{diffNum}}处差异</el-tag>
               </el-form-item>
@@ -72,12 +86,14 @@ export default {
       ],
       myEditorStyle: 'myEditorW',
       languageOption: [],
-      theme: 'vs',
       fontStyle: 'fontB',
-      language: 'plaintext',
       diffNum: 0,
-      inlineDiff: false,
-      wordWrap:false
+      originConfig: {
+        theme: 'vs',
+        language: 'plaintext',
+        inlineDiff: false,
+        wordWrap: false,
+      }
     }
   },
   mounted () {
@@ -147,32 +163,38 @@ export default {
     // eslint-disable-next-line no-undef
     utools.onPluginEnter(() => {
       // eslint-disable-next-line no-undef
-        const theme = utools.db.get('theme').data
+        const config = utools.db.get('config') && utools.db.get('config').data
 
-        this.theme = theme
-        
-        this.switchSystem(theme)
+        if (config) {
+          self.originConfig = config
+          self.switchSystem(config.theme)
+          self.languageChange(config.language)
+          self.InlineDiffChange(config.inlineDiff)
+          self.WordWrapChange(config.wordWrap)
+        } else {
+          self.updateConfigDb()
+        }
     })
   },
   methods: {
-    updateThemeDb(){
+    updateConfigDb(){
       // eslint-disable-next-line no-undef
-      console.log(utools.db.get('theme'));
+      console.log(utools.db.get('config'));
       // eslint-disable-next-line no-undef
-      if (!utools.db.get('theme')) {
+      if (!utools.db.get('config')) {
         // eslint-disable-next-line no-undef
         utools.db.put({
-          _id: "theme",
-          data: this.theme
+          _id: "config",
+          data: this.originConfig
         })
       } else {
         // eslint-disable-next-line no-undef
-        const theme = utools.db.get('theme')
+        const config = utools.db.get('config')
         // eslint-disable-next-line no-undef
         utools.db.put({
-          _id: "theme",
-          data: this.theme,
-          _rev: theme._rev
+          _id: "config",
+          data: this.originConfig,
+          _rev: config._rev
         })
       }
     },
@@ -197,6 +219,7 @@ export default {
         domReadOnly: false,
         originalEditable: true,
         automaticLayout: true,
+        mouseWheelZoom: true,
         diffWordWrap:"off"
       })
       self.monacoEditor.onDidUpdateDiff(()=>{
@@ -205,6 +228,19 @@ export default {
       self.diffNavigator = monaco.editor.createDiffNavigator(this.monacoEditor,{
         alwaysRevealFirst:true
       })
+      // 增加快捷键
+      self.monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.LeftArrow, function() {
+        self.previousDiff()
+      });
+      self.monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.RightArrow, function() {
+        self.nextDiff()
+      });
+      self.monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_D, function() {
+        self.clearContent()
+      });
+      self.monacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_E, function() {
+        self.formatContent()
+      });
     },
     themeChange (val) {
       monaco.editor.setTheme(val)
@@ -216,7 +252,7 @@ export default {
         this.fontStyle = 'fontW'
         this.changeClass(document.body, "custom-08E6B9");
       }
-      this.updateThemeDb()
+      this.updateConfigDb()
     },
     changeClass(element, className) {
       if (!element || !className) return;
@@ -226,20 +262,29 @@ export default {
       console.log(val);
       monaco.editor.setModelLanguage(this.monacoEditor.getModel().original, val)
       monaco.editor.setModelLanguage(this.monacoEditor.getModel().modified, val)
+      this.updateConfigDb()
     },
     clearContent(){
       this.monacoEditor.getModel().original.setValue('')
       this.monacoEditor.getModel().modified.setValue('')
     },
+    formatContent(){
+      console.log('格式化');
+       
+      this.monacoEditor.getOriginalEditor().trigger('','editor.action.formatDocument');
+      this.monacoEditor.getModifiedEditor().trigger('','editor.action.formatDocument');
+    }, 
     InlineDiffChange(val){
       this.monacoEditor.updateOptions({
         renderSideBySide: !val
       });
+      this.updateConfigDb()
     },
     WordWrapChange(val){
       this.monacoEditor.updateOptions({
         diffWordWrap: val?'on':'off'
       });
+      this.updateConfigDb()
     },
     initModel (original, modified) {
       this.monacoEditor.setModel({

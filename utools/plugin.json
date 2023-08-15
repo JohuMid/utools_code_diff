@@ -5,7 +5,7 @@
   "author": "johu",
   "main": "dist/index.html",
   "development": {
-    "main": "http://localhost:8081/index.html"
+    "main": "http://localhost:8080/index.html"
   },
   "pluginSetting": {
     "single": false
